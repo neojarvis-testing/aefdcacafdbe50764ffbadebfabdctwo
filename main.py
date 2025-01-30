@@ -1,63 +1,86 @@
 import pyodbc
- 
-# Connect to SQL Server (without specifying a database)
-connectionString = "Driver={ODBC Driver 17 for SQL Server};UID=sa;PWD=examlyMssql@123;Server=localhost;Trusted_Connection=No;Persist Security Info=False;Encrypt=No"
-conn = pyodbc.connect(connectionString, autocommit=True)  # Enable autocommit
+
+# Database connection string
+connectionString = "Driver={ODBC Driver 17 for SQL Server};UID=sa;PWD=examlyMssql@123;Server=localhost;Database=TestDatabase;Trusted_Connection=No;Persist Security Info=False;Encrypt=No"
+
+# Connect to database
+conn = pyodbc.connect(connectionString)
 cursor = conn.cursor()
- 
-print("LOGGING IN...")
- 
-# Database name
-db_name = "TestDatabase"
- 
-# Step 1: Create the database (if not exists)
-cursor.execute(f"IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '{db_name}') CREATE DATABASE {db_name}")
-print(f"Database '{db_name}' created successfully (if it didn't exist).")
- 
-# Close initial connection
-cursor.close()
-conn.close()
- 
-# Step 2: Connect to the new database
-connectionString = f"Driver={{ODBC Driver 17 for SQL Server}};UID=sa;PWD=examlyMssql@123;Server=localhost;Database={db_name};Trusted_Connection=No;Persist Security Info=False;Encrypt=No"
-conn = pyodbc.connect(connectionString)  # Connect to the new database
-cursor = conn.cursor()
- 
-# Step 3: Verify connection by printing the current database
-cursor.execute("SELECT DB_NAME()")
-db = cursor.fetchone()[0]
-print(f"Connected to database: {db}")
- 
-# Step 4: Create a new table (if not exists)
+
+# Create Users table (if not exists)
 cursor.execute("""
-    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TestTable')
+    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users')
     BEGIN
-        CREATE TABLE TestTable (
+        CREATE TABLE Users (
             ID INT IDENTITY(1,1) PRIMARY KEY,
-            Name NVARCHAR(50),
-            Age INT,
-            City NVARCHAR(50)
+            Name NVARCHAR(100),
+            Email NVARCHAR(100)
         )
     END
 """)
 conn.commit()
-print("Table created successfully (if it didn't exist).")
- 
-# Step 5: Insert test data
-cursor.execute("INSERT INTO TestTable (Name, Age, City) VALUES (?, ?, ?)", ("Alice", 25, "New York"))
-cursor.execute("INSERT INTO TestTable (Name, Age, City) VALUES (?, ?, ?)", ("Bob", 30, "Los Angeles"))
-cursor.execute("INSERT INTO TestTable (Name, Age, City) VALUES (?, ?, ?)", ("Charlie", 28, "Chicago"))
-conn.commit()
-print("Test data inserted successfully.")
- 
-# Step 6: Fetch and print the data
-cursor.execute("SELECT * FROM TestTable")
-rows = cursor.fetchall()
- 
-print("\nRetrieved Data:")
-for row in rows:
-    print(f"ID: {row.ID}, Name: {row.Name}, Age: {row.Age}, City: {row.City}")
- 
+print("✅ Users table is ready.")
+
+# Function to insert a user
+def insert_user():
+    name = input("Enter Name: ")
+    email = input("Enter Email: ")
+    cursor.execute("INSERT INTO Users (Name, Email) VALUES (?, ?)", (name, email))
+    conn.commit()
+    print(f"✅ User '{name}' added successfully.")
+
+# Function to fetch all users
+def fetch_users():
+    cursor.execute("SELECT * FROM Users")
+    rows = cursor.fetchall()
+    if rows:
+        print("\n📌 Users in Database:")
+        for row in rows:
+            print(f"ID: {row.ID}, Name: {row.Name}, Email: {row.Email}")
+    else:
+        print("⚠ No users found.")
+
+# Function to update a user
+def update_user():
+    user_id = input("Enter User ID to update: ")
+    name = input("Enter New Name: ")
+    email = input("Enter New Email: ")
+    cursor.execute("UPDATE Users SET Name = ?, Email = ? WHERE ID = ?", (name, email, user_id))
+    conn.commit()
+    print(f"✅ User ID {user_id} updated.")
+
+# Function to delete a user
+def delete_user():
+    user_id = input("Enter User ID to delete: ")
+    cursor.execute("DELETE FROM Users WHERE ID = ?", (user_id,))
+    conn.commit()
+    print(f"❌ User ID {user_id} deleted.")
+
+# Main loop for user interaction
+while True:
+    print("\n📌 Choose an option:")
+    print("1️⃣ Insert User")
+    print("2️⃣ Fetch Users")
+    print("3️⃣ Update User")
+    print("4️⃣ Delete User")
+    print("5️⃣ Exit")
+    
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        insert_user()
+    elif choice == "2":
+        fetch_users()
+    elif choice == "3":
+        update_user()
+    elif choice == "4":
+        delete_user()
+    elif choice == "5":
+        print("👋 Exiting program. Goodbye!")
+        break
+    else:
+        print("⚠ Invalid choice! Please try again.")
+
 # Close connection
 cursor.close()
 conn.close()
