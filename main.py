@@ -19,7 +19,7 @@ cursor.execute("""
     END
 """)
 conn.commit()
-print("✅ Users table is ready.")
+print("Users table is ready.")
 
 # Function to insert a user
 def insert_user():
@@ -27,7 +27,7 @@ def insert_user():
     email = input("Enter Email: ")
     cursor.execute("INSERT INTO Users (Name, Email) VALUES (?, ?)", (name, email))
     conn.commit()
-    print(f"✅ User '{name}' added successfully.")
+    print(f"User '{name}' added successfully.")
 
 # Function to fetch all users
 def fetch_users():
@@ -47,23 +47,23 @@ def update_user():
     email = input("Enter New Email: ")
     cursor.execute("UPDATE Users SET Name = ?, Email = ? WHERE ID = ?", (name, email, user_id))
     conn.commit()
-    print(f"✅ User ID {user_id} updated.")
+    print(f"User ID {user_id} updated.")
 
 # Function to delete a user
 def delete_user():
     user_id = input("Enter User ID to delete: ")
     cursor.execute("DELETE FROM Users WHERE ID = ?", (user_id,))
     conn.commit()
-    print(f"❌ User ID {user_id} deleted.")
+    print(f"User ID {user_id} deleted.")
 
 # Main loop for user interaction
 while True:
-    print("\n📌 Choose an option:")
-    print("1️⃣ Insert User")
-    print("2️⃣ Fetch Users")
-    print("3️⃣ Update User")
-    print("4️⃣ Delete User")
-    print("5️⃣ Exit")
+    print("\n Choose an option:")
+    print("1.Insert User")
+    print("2.Fetch Users")
+    print("3.Update User")
+    print("4.Delete User")
+    print("5.Exit")
     
     choice = input("Enter your choice: ")
 
@@ -76,10 +76,10 @@ while True:
     elif choice == "4":
         delete_user()
     elif choice == "5":
-        print("👋 Exiting program. Goodbye!")
+        print("Exiting program. Goodbye!")
         break
     else:
-        print("⚠ Invalid choice! Please try again.")
+        print("Invalid choice! Please try again.")
 
 # Close connection
 cursor.close()
